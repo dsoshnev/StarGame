@@ -1,0 +1,20 @@
+
+MenuAtlas.png
+size: 1024,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+ButtonExit
+  rotate: false
+  xy: 2, 306
+  size: 766, 304
+  orig: 766, 304
+  offset: 0, 0
+  index: -1
+ButtonPlay
+  rotate: false
+  xy: 2, 2
+  size: 766, 302
+  orig: 766, 302
+  offset: 0, 0
+  index: -1

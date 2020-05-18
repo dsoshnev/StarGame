@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 
 import ru.geekbrains.utils.MatrixUtils;
 import ru.geekbrains.utils.Rect;
@@ -97,11 +98,23 @@ public class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        Vector2 touch = new Vector2();
+        touch.set(screenX, Gdx.graphics.getHeight() - screenY).mul(screenToWorld);
+        return touchDown(touch, pointer, button);
+    }
+
+    public boolean touchDown(Vector2 touch, int pointer, int button) {
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        Vector2 touch = new Vector2();
+        touch.set(screenX, Gdx.graphics.getHeight() - screenY).mul(screenToWorld);
+        return touchUp(touch, pointer, button);
+    }
+
+    public boolean touchUp(Vector2 touch, int pointer, int button) {
         return false;
     }
 
