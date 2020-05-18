@@ -6,6 +6,7 @@ import ru.geekbrains.base.Sprite;
 import ru.geekbrains.utils.Rect;
 
 public class Background extends Sprite {
+
     private Texture texture;
 
     public Background(Texture texture) {
