@@ -1,5 +1,6 @@
 package ru.geekbrains.base;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
@@ -13,8 +14,11 @@ public abstract class ButtonSprite extends Sprite {
 
     private boolean pressed;
 
-    public ButtonSprite(TextureRegion textureRegion) {
+    protected Game game;
+
+    public ButtonSprite(TextureRegion textureRegion, Game game) {
         super(textureRegion);
+        this.game = game;
         setPressed(false);
     }
 

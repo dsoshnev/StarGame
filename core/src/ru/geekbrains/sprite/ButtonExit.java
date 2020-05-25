@@ -3,13 +3,14 @@ package ru.geekbrains.sprite;
 import ru.geekbrains.base.ButtonSprite;
 import ru.geekbrains.utils.Rect;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class ButtonExit extends ButtonSprite {
 
-    public ButtonExit(TextureAtlas atlas) {
-        super(atlas.findRegion("ButtonExit"));
+    public ButtonExit(TextureAtlas atlas, Game game) {
+        super(atlas.findRegion("ButtonExit"), game);
     }
 
     @Override

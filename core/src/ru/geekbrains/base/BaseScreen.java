@@ -1,5 +1,6 @@
 package ru.geekbrains.base;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
@@ -23,6 +24,16 @@ public class BaseScreen implements Screen, InputProcessor {
     protected Matrix4 worldToGl;
     protected Matrix3 screenToWorld;
 
+    protected Game game;
+
+    public BaseScreen(Game game) {
+        this.game = game;
+    }
+
+    public void setScreen(Screen screen) {
+        game.setScreen(screen);
+    }
+
     @Override
     public void show() {
         Gdx.input.setInputProcessor(this);
@@ -42,6 +53,7 @@ public class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public void resize(int width, int height) {
+
         screenBounds.setSize(width, height);
         screenBounds.setLeft(0);
         screenBounds.setBottom(0);
@@ -52,11 +64,12 @@ public class BaseScreen implements Screen, InputProcessor {
         MatrixUtils.calcTransitionMatrix(worldToGl, worldBounds, glBounds);
         MatrixUtils.calcTransitionMatrix(screenToWorld, screenBounds, worldBounds);
         batch.setProjectionMatrix(worldToGl);
+        System.out.printf("resize {h=%s, w=%s}%n", height, width);
         resize(worldBounds);
     }
 
     public void resize(Rect worldBounds) {
-        System.out.println("worldBounds worldBounds.height = " + worldBounds.getHeight() + " worldBounds.with = " + worldBounds.getWidth());
+        System.out.printf("worldBounds {height=%s, with=%s}%n", worldBounds.getHeight(), worldBounds.getWidth());
     }
 
     @Override
@@ -132,4 +145,5 @@ public class BaseScreen implements Screen, InputProcessor {
     public boolean scrolled(int amount) {
         return false;
     }
+
 }
