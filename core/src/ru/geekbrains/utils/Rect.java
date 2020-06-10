@@ -2,6 +2,9 @@ package ru.geekbrains.utils;
 
 import com.badlogic.gdx.math.Vector2;
 
+/**
+ * Прямоугольник
+ */
 public class Rect {
     public final Vector2 pos = new Vector2(); // center position
     protected float halfWidth; // half width
@@ -98,6 +101,6 @@ public class Rect {
 
     @Override
     public String toString() {
-        return "Rectangle: pos" + pos + " size(" + getWidth() + ", " + getHeight() + ")";
+        return String.format("Rectangle {pos=%s, width=%s, height=%s}%n", pos, getWidth(), getHeight());
     }
 }
