@@ -16,6 +16,7 @@ public class Sprite extends Rect implements Pool.Poolable {
     protected int frame = 0;
     private boolean active;
     protected Rect worldBounds;
+    private Sprite owner;
 
     public Sprite() { }
 
@@ -100,5 +101,20 @@ public class Sprite extends Rect implements Pool.Poolable {
     @Override
     public void reset() {
         setActive(false);
+    }
+
+    public void dispose() {}
+
+    public boolean collided(Sprite sprite) {
+        float minDst = this.getHalfWidth() + sprite.getHalfWidth();
+        return this.pos.dst(sprite.pos) < minDst;
+    }
+
+    public Sprite getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Sprite owner) {
+        this.owner = owner;
     }
 }

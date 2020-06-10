@@ -2,16 +2,14 @@ package ru.geekbrains.sprite;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Pool;
 
 import ru.geekbrains.base.Sprite;
 import ru.geekbrains.utils.Rect;
 
-public class Bullet extends Sprite implements Pool.Poolable {
+public class Bullet extends Sprite {
     private Rect worldBounds;
     private Vector2 v;
     private int damage;
-    private Sprite owner;
 
     public Bullet() {
         regions = new TextureRegion[1];
@@ -41,7 +39,7 @@ public class Bullet extends Sprite implements Pool.Poolable {
             Rect worldBounds,
             int damage
     ) {
-        this.owner = owner;
+        setOwner(owner);
         this.regions[0] = region;
         this.pos.set(pos0);
         this.v.set(v0);
@@ -53,10 +51,6 @@ public class Bullet extends Sprite implements Pool.Poolable {
 
     public int getDamage() {
         return damage;
-    }
-
-    public Sprite getOwner() {
-        return owner;
     }
 
 }

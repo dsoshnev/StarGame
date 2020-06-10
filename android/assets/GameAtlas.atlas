@@ -1,20 +1,90 @@
 
 GameAtlas.png
-size: 512,512
+size: 1024,128
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-Spaceship1
+bullet1
   rotate: false
-  xy: 2, 2
-  size: 188, 280
-  orig: 188, 280
+  xy: 752, 58
+  size: 12, 52
+  orig: 12, 52
   offset: 0, 0
   index: -1
-Spaceship2
+bullet2
   rotate: false
-  xy: 192, 2
-  size: 188, 280
-  orig: 188, 280
+  xy: 766, 58
+  size: 12, 52
+  orig: 12, 52
+  offset: 0, 0
+  index: -1
+enemy1
+  rotate: false
+  xy: 460, 2
+  size: 106, 52
+  orig: 106, 52
+  offset: 0, 0
+  index: -1
+enemy2
+  rotate: false
+  xy: 568, 10
+  size: 106, 46
+  orig: 106, 46
+  offset: 0, 0
+  index: -1
+enemy3
+  rotate: false
+  xy: 460, 56
+  size: 106, 54
+  orig: 106, 54
+  offset: 0, 0
+  index: -1
+enemy4
+  rotate: false
+  xy: 568, 58
+  size: 106, 52
+  orig: 106, 52
+  offset: 0, 0
+  index: -1
+enemy5
+  rotate: false
+  xy: 676, 56
+  size: 74, 54
+  orig: 74, 54
+  offset: 0, 0
+  index: -1
+explosion
+  rotate: false
+  xy: 2, 16
+  size: 324, 94
+  orig: 324, 94
+  offset: 0, 0
+  index: -1
+explosion1
+  rotate: false
+  xy: 2, 16
+  size: 160, 94
+  orig: 160, 94
+  offset: 0, 0
+  index: -1
+explosion2
+  rotate: false
+  xy: 164, 16
+  size: 160, 94
+  orig: 160, 94
+  offset: 0, 0
+  index: -1
+spaceship
+  rotate: false
+  xy: 326, 2
+  size: 132, 108
+  orig: 132, 108
+  offset: 0, 0
+  index: -1
+star
+  rotate: false
+  xy: 2, 8
+  size: 6, 6
+  orig: 6, 6
   offset: 0, 0
   index: -1

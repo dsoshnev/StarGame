@@ -16,10 +16,12 @@ import ru.geekbrains.utils.Rect;
 public class SpaceShip extends Sprite {
 
     private static final float SPEED = 0.005f;
-    private static final float BULLET_SPEED = 0.5f;
-    private static final float SIZE =  0.20f;
+    private static final float SIZE =  0.1f;
     private static final float RELOAD_INTERVAL = 0.25f;
     private static final float INERTIA = 0.25f;
+
+    private static final float BULLET_SPEED = 0.5f;
+    private static final float BULLET_SIZE = 0.05f;
 
     private Vector2 touchPosition;
     private Vector2 v;
@@ -36,7 +38,7 @@ public class SpaceShip extends Sprite {
     private Sound bulletSound;
 
     public SpaceShip(TextureAtlas atlas, SpriteFactory bullets) {
-        super(atlas.findRegion("main_ship"), 1, 2, 2);
+        super(atlas.findRegion("spaceship"));
         this.atlas = atlas;
 
         // init Spaceship
@@ -47,7 +49,7 @@ public class SpaceShip extends Sprite {
         // init Bullets
         this.bullets = bullets;
         this.bulletV = new Vector2(0, BULLET_SPEED);
-        this.bulletRegion = atlas.findRegion("bulletMainShip");
+        this.bulletRegion = atlas.findRegion("bullet2");
         this.bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
     }
 
@@ -57,7 +59,6 @@ public class SpaceShip extends Sprite {
         setHeightProportion(SIZE);
         setBottom(worldBounds.getBottom());
         touchPosition.set(pos);
-        bullets.resize(worldBounds);
     }
 
     @Override
@@ -69,6 +70,7 @@ public class SpaceShip extends Sprite {
             v.setLength(SPEED);
         }
         pos.add(v);
+        //pos.mulAdd(v, delta);
 
         if(getLeft() < worldBounds.getLeft()) {
             stop();
@@ -80,19 +82,13 @@ public class SpaceShip extends Sprite {
             setRight(worldBounds.getRight());
         }
 
+        // autoshooting
+        /*
         passingTime +=delta;
         if (passingTime >= reloadInterval) {
             shoot();
             passingTime = 0;
-        }
-
-        bullets.update(delta);
-    }
-
-    @Override
-    public void draw(SpriteBatch batch) {
-        super.draw(batch);
-        bullets.draw(batch);
+        }*/
     }
 
     @Override
@@ -134,7 +130,7 @@ public class SpaceShip extends Sprite {
 
     private void shoot() {
         Bullet bullet = (Bullet) bullets.obtain();
-        bullet.setup(this, bulletRegion, pos, bulletV, 0.01f, worldBounds, 1);
+        bullet.setup(this, bulletRegion, pos, bulletV, BULLET_SIZE, worldBounds, 1);
         bulletSound.play();
     }
 
@@ -150,4 +146,9 @@ public class SpaceShip extends Sprite {
         touchPosition.set(pos);
     }
 
+    @Override
+    public void dispose() {
+        bulletSound.dispose();
+        super.dispose();
+    }
 }

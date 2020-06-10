@@ -9,6 +9,8 @@ import ru.geekbrains.utils.Rnd;
 
 public class Star extends Sprite {
 
+    private static final float SIZE =  0.01f;
+
     private Vector2 v;
     private Rect worldBounds;
 
@@ -27,7 +29,7 @@ public class Star extends Sprite {
     @Override
     public void resize(Rect worldBounds) {
         this.worldBounds = worldBounds;
-        setHeightProportion(0.01f);
+        setHeightProportion(SIZE);
         float posX = Rnd.nextFloat(worldBounds.getLeft(), worldBounds.getRight());
         float posY = Rnd.nextFloat(worldBounds.getBottom(), worldBounds.getTop());
         pos.set(posX, posY);

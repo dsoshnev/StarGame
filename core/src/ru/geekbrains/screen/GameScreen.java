@@ -6,9 +6,12 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
+
+import java.util.List;
 import java.util.Random;
 
 import ru.geekbrains.base.BaseScreen;
+import ru.geekbrains.base.Sprite;
 import ru.geekbrains.group.SpriteFactory;
 import ru.geekbrains.sprite.Background;
 import ru.geekbrains.sprite.EnemyShip;
@@ -18,6 +21,13 @@ import ru.geekbrains.utils.Rect;
 import ru.geekbrains.utils.Rnd;
 
 public class GameScreen extends BaseScreen {
+
+    public enum GameState {
+        GAME_MAIN,
+        GAME_OVER
+    }
+
+    private GameState gameState;
 
     private TextureAtlas atlas;
     private SpaceShip spaceShip;
@@ -46,7 +56,10 @@ public class GameScreen extends BaseScreen {
     @Override
     public void show() {
         super.show();
-        atlas = new TextureAtlas("mainAtlas.tpack");
+        atlas = new TextureAtlas("GameAtlas.atlas");
+
+        // Game
+        gameState = GameState.GAME_MAIN;
 
         // Bullets
         bullets = new SpriteFactory(SpriteFactory.SpriteType.BULLET);
@@ -54,9 +67,9 @@ public class GameScreen extends BaseScreen {
         // Spaceship
         spaceShip = new SpaceShip(atlas, bullets);
 
-        // Stars
+        // Stars and Background
         background = new Background(new Texture("bg.png"));
-        stars = new Stars(atlas, 300);
+        stars = new Stars(atlas, 100);
 
         // Music
         music = Gdx.audio.newMusic(Gdx.files.internal("sounds/gamemusic.mp3"));
@@ -74,38 +87,53 @@ public class GameScreen extends BaseScreen {
         spaceShip.resize(worldBounds);
         stars.resize(worldBounds);
         enemyShips.resize(worldBounds);
+        bullets.resize(worldBounds);
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
+        update(delta);
+        draw();
+    }
 
-        //Update
+    private void update(float delta) {
         stars.update(delta);
-        spaceShip.update(delta);
 
-        passingTime +=delta;
-        if (passingTime >= ENEMY_TIME) {
-            createEnemy();
-            passingTime = 0;
+        if(gameState == GameState.GAME_MAIN) {
+            spaceShip.update(delta);
+
+            passingTime += delta;
+            if (passingTime >= ENEMY_TIME) {
+                createEnemy();
+                passingTime = 0;
+            }
+
+            enemyShips.update(delta);
+
+            checkCollision();
+
+            bullets.update(delta);
         }
+    }
 
-        enemyShips.update(delta);
-
-        //Draw
+    private void draw() {
         batch.begin();
         background.draw(batch);
         stars.draw(batch);
         spaceShip.draw(batch);
         enemyShips.draw(batch);
+        bullets.draw(batch);
         batch.end();
     }
 
     private void createEnemy() {
         float x0 = Rnd.nextFloat(-0.25f, 0.25f);
-        int type = new Random().nextInt(3);
+        //float x0 = Rnd.nextFloat(worldBounds.getLeft(), worldBounds.getRight());
+        int enemyType = new Random().nextInt(3);
         EnemyShip enemyShip = (EnemyShip) enemyShips.obtain();
-        enemyShip.setup(atlas, bullets, new Vector2(x0, 1f), worldBounds, type);
+        Vector2 pos0 = new Vector2(x0, 1f);
+        enemyShip.setup(atlas, bullets, pos0, worldBounds, enemyType);
     }
 
     @Override
@@ -132,11 +160,36 @@ public class GameScreen extends BaseScreen {
         return super.keyUp(keycode);
     }
 
+    private void checkCollision() {
+        if(gameState == GameState.GAME_MAIN) {
+            List<Sprite> activeEnemyShips = enemyShips.getActiveSprites();
+            List<Sprite> activeBullets = bullets.getActiveSprites();
+            for (Sprite activeEnemyShip : activeEnemyShips) {
+                for (Sprite activeBullet : activeBullets) {
+                    if (activeBullet.isActive() && activeBullet.getOwner() != activeEnemyShip) {
+                        if (activeEnemyShip.collided(activeBullet)) {
+                            activeEnemyShip.destroy();
+                        }
+                    }
+                }
+            }
+            for (Sprite activeBullet : activeBullets) {
+                if (activeBullet.isActive() && activeBullet.getOwner() != spaceShip) {
+                    if (spaceShip.collided(activeBullet)) {
+                        gameState = GameState.GAME_OVER;
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void dispose() {
         background.dispose();
         atlas.dispose();
         music.dispose();
+        spaceShip.dispose();
+        enemyShips.dispose();
         super.dispose();
     }
 }

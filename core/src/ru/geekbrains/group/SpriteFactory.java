@@ -65,7 +65,9 @@ public class SpriteFactory {
             if(!sprite.isActive()) {
                 itr.remove();
                 freeSprites.free(sprite);
-                //System.out.println(toString());
+                /*if(sprite.getClass().getSimpleName().equals("EnemyShip")) {
+                    System.out.printf("%s:%s%n", sprite.getClass().getSimpleName(), toString());
+                }*/
             }
         }
 
@@ -80,15 +82,26 @@ public class SpriteFactory {
     public Sprite obtain() {
         Sprite sprite = freeSprites.obtain();
         activeSprites.add(sprite);
-        //System.out.println(toString());
+        /*if(sprite.getClass().getSimpleName().equals("EnemyShip")) {
+            System.out.printf("%s:%s%n", sprite.getClass().getSimpleName(), toString());
+        }*/
         return sprite;
     }
 
     @Override
     public String toString() {
-        return String.format("%s{Active=%s,Free=%s}",
-                this.getClass().getName(),
+        return String.format("SpriteFactory {Active=%s,Free=%s}",
                 activeSprites.size(),
                 freeSprites.getFree());
+    }
+
+    public void dispose() {
+        for (Sprite sprite : activeSprites) {
+            sprite.dispose();
+        }
+    }
+
+    public List<Sprite> getActiveSprites() {
+        return activeSprites;
     }
 }

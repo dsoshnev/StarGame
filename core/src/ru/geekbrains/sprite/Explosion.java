@@ -16,11 +16,9 @@ public class Explosion extends Sprite {
     }
 
     public Explosion(TextureAtlas atlas, Sound sound) {
-        super(atlas.findRegion("explosion"), 9, 9, 74);
+        super(atlas.findRegion("explosion"), 1, 2, 2);
         this.sound = sound;
     }
-
-
 
     public void setup(float height, Vector2 pos) {
         setHeightProportion(height);
