@@ -1,26 +1,33 @@
 package ru.geekbrains.screen;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 
 import java.util.List;
 import java.util.Random;
 
+import ru.geekbrains.StarGame;
 import ru.geekbrains.base.BaseScreen;
 import ru.geekbrains.base.Sprite;
+import ru.geekbrains.base.ZXFont;
 import ru.geekbrains.group.SpriteFactory;
-import ru.geekbrains.sprite.Background;
 import ru.geekbrains.sprite.EnemyShip;
+import ru.geekbrains.sprite.Explosion;
 import ru.geekbrains.sprite.SpaceShip;
 import ru.geekbrains.group.Stars;
 import ru.geekbrains.utils.Rect;
 import ru.geekbrains.utils.Rnd;
 
 public class GameScreen extends BaseScreen {
+
+    private static final String TEXT_SCORE = "SCORE:";
+    private static final String TEXT_HP = "HP:";
+    private static final String TEXT_RD = "RED ALARM";
+    private static final String TEXT_GAME_OVER = "GAME OVER";
+    private static final float GAME_OVER_INTERVAL = 5f;
 
     public enum GameState {
         GAME_MAIN,
@@ -29,10 +36,10 @@ public class GameScreen extends BaseScreen {
 
     private GameState gameState;
 
-    private TextureAtlas atlas;
+    public TextureAtlas atlas;
+
     private SpaceShip spaceShip;
-    private Background background;
-    private Music music;
+
 
     //Stars
     private Stars stars;
@@ -40,23 +47,32 @@ public class GameScreen extends BaseScreen {
     //Bullets
     private SpriteFactory bullets;
 
-    // Enemy Ships
-    private static final float ENEMY_TIME = 4f;
+    //Enemies
+    private static final float ENEMY_INTERVAL = 4f;
     private SpriteFactory enemyShips;
 
+    //Explosion
+    private Explosion explosion;
+
+    //Font
+    ZXFont font;
+    StringBuffer sbScore;
+    StringBuffer sbHP;
+    int score;
 
     private float passingTime;
+    private float passingTime1;
 
-    public GameScreen(Game game) {
+    public GameScreen(StarGame game) {
         super(game);
         //Gdx.graphics.setResizable(false);
-        Gdx.graphics.setWindowedMode(480,640);
+        //Gdx.graphics.setWindowedMode(480,640);
     }
 
     @Override
     public void show() {
         super.show();
-        atlas = new TextureAtlas("GameAtlas.atlas");
+        atlas = game.getGameAtlas();
 
         // Game
         gameState = GameState.GAME_MAIN;
@@ -66,28 +82,33 @@ public class GameScreen extends BaseScreen {
 
         // Spaceship
         spaceShip = new SpaceShip(atlas, bullets);
+        spaceShip.setActive(true);
 
         // Stars and Background
-        background = new Background(new Texture("bg.png"));
         stars = new Stars(atlas, 100);
 
-        // Music
-        music = Gdx.audio.newMusic(Gdx.files.internal("sounds/gamemusic.mp3"));
-        music.setVolume(0.05f);
-        music.play();
-
-        // EnemyShips
+        // Enemies
         enemyShips = new SpriteFactory(SpriteFactory.SpriteType.ENEMY_SHIP);
+
+        // Explosion
+        explosion = new Explosion(atlas, Gdx.audio.newSound(Gdx.files.internal("sounds/explosion.wav")));
+
+
+        //Font
+        font = new ZXFont("fonts/ZXSpectrum.fnt", "fonts/ZXSpectrum.png");
+        font.setSize(ZXFont.TEXT_SIZE * 0.75f);
+        sbScore = new StringBuffer(TEXT_SCORE);
+        sbHP = new StringBuffer(TEXT_HP);
+        score = 0;
     }
 
     @Override
     public void resize(Rect worldBounds) {
         super.resize(worldBounds);
-        background.resize(worldBounds);
-        spaceShip.resize(worldBounds);
         stars.resize(worldBounds);
-        enemyShips.resize(worldBounds);
         bullets.resize(worldBounds);
+        spaceShip.resize(worldBounds);
+        enemyShips.resize(worldBounds);
     }
 
     @Override
@@ -102,38 +123,38 @@ public class GameScreen extends BaseScreen {
 
         if(gameState == GameState.GAME_MAIN) {
             spaceShip.update(delta);
-
-            passingTime += delta;
-            if (passingTime >= ENEMY_TIME) {
-                createEnemy();
-                passingTime = 0;
-            }
-
+            createEnemy(delta);
             enemyShips.update(delta);
-
             checkCollision();
-
             bullets.update(delta);
+        } else {
+            explosion.update(delta);
+            gameOver(delta);
         }
     }
 
     private void draw() {
         batch.begin();
-        background.draw(batch);
         stars.draw(batch);
+        bullets.draw(batch);
         spaceShip.draw(batch);
         enemyShips.draw(batch);
-        bullets.draw(batch);
+        explosion.draw(batch);
+        printInfo();
         batch.end();
     }
 
-    private void createEnemy() {
-        float x0 = Rnd.nextFloat(-0.25f, 0.25f);
-        //float x0 = Rnd.nextFloat(worldBounds.getLeft(), worldBounds.getRight());
-        int enemyType = new Random().nextInt(3);
-        EnemyShip enemyShip = (EnemyShip) enemyShips.obtain();
-        Vector2 pos0 = new Vector2(x0, 1f);
-        enemyShip.setup(atlas, bullets, pos0, worldBounds, enemyType);
+    private void createEnemy(float delta) {
+        passingTime += delta;
+        if (passingTime >= ENEMY_INTERVAL) {
+            //float x0 = Rnd.nextFloat(-0.25f, 0.25f);
+            float x0 = Rnd.nextFloat(worldBounds.getLeft(), worldBounds.getRight());
+            int enemyType = new Random().nextInt(3);
+            EnemyShip enemyShip = (EnemyShip) enemyShips.obtain();
+            Vector2 pos0 = new Vector2(x0, 1f);
+            enemyShip.setup(atlas, bullets, pos0, worldBounds, enemyType);
+            passingTime = 0;
+        }
     }
 
     @Override
@@ -165,31 +186,77 @@ public class GameScreen extends BaseScreen {
             List<Sprite> activeEnemyShips = enemyShips.getActiveSprites();
             List<Sprite> activeBullets = bullets.getActiveSprites();
             for (Sprite activeEnemyShip : activeEnemyShips) {
+
                 for (Sprite activeBullet : activeBullets) {
                     if (activeBullet.isActive() && activeBullet.getOwner() != activeEnemyShip) {
                         if (activeEnemyShip.collided(activeBullet)) {
-                            activeEnemyShip.destroy();
+                            activeEnemyShip.damage(activeBullet.getDamage());
+                            score += activeEnemyShip.getDamage();
+                            activeBullet.destroy();
                         }
                     }
                 }
+
+                if (spaceShip.collided(activeEnemyShip)) {
+                    spaceShip.damage(activeEnemyShip.getDamage());
+                    score += activeEnemyShip.getDamage();
+                    activeEnemyShip.destroy();
+                }
             }
+
             for (Sprite activeBullet : activeBullets) {
                 if (activeBullet.isActive() && activeBullet.getOwner() != spaceShip) {
                     if (spaceShip.collided(activeBullet)) {
-                        gameState = GameState.GAME_OVER;
+                        if(!spaceShip.isShieldUp()) {
+                            spaceShip.damage(activeBullet.getDamage());
+                        }
+                        activeBullet.destroy();
+                        if(spaceShip.getHitPoint() == 0) {
+                            gameState = GameState.GAME_OVER;
+                            explosion.setup(0.1f, spaceShip.pos);
+                        }
                     }
                 }
             }
         }
     }
 
+    void printInfo() {
+        sbScore.setLength(TEXT_SCORE.length());
+        sbHP.setLength(TEXT_HP.length());
+        font.setSize(ZXFont.TEXT_SIZE * 0.75f);
+
+        if(spaceShip.isShieldUp()) {
+            font.setColor(Color.RED);
+            font.draw(batch, TEXT_RD, worldBounds.getLeft() + font.getSpaceXadvance() * 16, worldBounds.getTop(), Align.left);
+        } else {
+            font.setColor(Color.WHITE);
+        }
+        font.draw(batch, sbScore.append(score), worldBounds.getLeft() + font.getSpaceXadvance() * 0.1f,worldBounds.getTop(), Align.left);
+        font.draw(batch, sbHP.append(spaceShip.getHitPoint()), worldBounds.getLeft() + font.getSpaceXadvance() * 9,worldBounds.getTop(), Align.left);
+
+        if(gameState == GameState.GAME_OVER) {
+            font.setSize(ZXFont.TEXT_SIZE * 2f);
+            font.draw(batch, TEXT_GAME_OVER, 0,0, Align.center);
+        }
+    }
+
+    void gameOver(float delta) {
+        passingTime1 += delta;
+        if (passingTime1 >= GAME_OVER_INTERVAL) {
+            game.setScreen(game.getMenuScreen());
+            passingTime1 = 0;
+        }
+    }
+
+
     @Override
     public void dispose() {
-        background.dispose();
         atlas.dispose();
-        music.dispose();
         spaceShip.dispose();
         enemyShips.dispose();
+        explosion.dispose();
+        font.dispose();
         super.dispose();
     }
 }

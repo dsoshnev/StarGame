@@ -6,49 +6,49 @@ filter: Nearest,Nearest
 repeat: none
 bullet1
   rotate: false
-  xy: 752, 58
+  xy: 886, 58
   size: 12, 52
   orig: 12, 52
   offset: 0, 0
   index: -1
 bullet2
   rotate: false
-  xy: 766, 58
+  xy: 900, 58
   size: 12, 52
   orig: 12, 52
   offset: 0, 0
   index: -1
 enemy1
   rotate: false
-  xy: 460, 2
+  xy: 594, 2
   size: 106, 52
   orig: 106, 52
   offset: 0, 0
   index: -1
 enemy2
   rotate: false
-  xy: 568, 10
+  xy: 702, 10
   size: 106, 46
   orig: 106, 46
   offset: 0, 0
   index: -1
 enemy3
   rotate: false
-  xy: 460, 56
+  xy: 594, 56
   size: 106, 54
   orig: 106, 54
   offset: 0, 0
   index: -1
 enemy4
   rotate: false
-  xy: 568, 58
+  xy: 702, 58
   size: 106, 52
   orig: 106, 52
   offset: 0, 0
   index: -1
 enemy5
   rotate: false
-  xy: 676, 56
+  xy: 810, 56
   size: 74, 54
   orig: 74, 54
   offset: 0, 0
@@ -77,6 +77,20 @@ explosion2
 spaceship
   rotate: false
   xy: 326, 2
+  size: 268, 108
+  orig: 268, 108
+  offset: 0, 0
+  index: -1
+spaceship1
+  rotate: false
+  xy: 326, 2
+  size: 132, 108
+  orig: 132, 108
+  offset: 0, 0
+  index: -1
+spaceship2
+  rotate: false
+  xy: 460, 2
   size: 132, 108
   orig: 132, 108
   offset: 0, 0

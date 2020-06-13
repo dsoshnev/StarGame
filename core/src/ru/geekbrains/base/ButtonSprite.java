@@ -1,9 +1,9 @@
 package ru.geekbrains.base;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
+import ru.geekbrains.StarGame;
 import ru.geekbrains.utils.Rect;
 
 // w/o multitouch
@@ -14,9 +14,9 @@ public abstract class ButtonSprite extends Sprite {
 
     private boolean pressed;
 
-    protected Game game;
+    protected StarGame game;
 
-    public ButtonSprite(TextureRegion textureRegion, Game game) {
+    public ButtonSprite(TextureRegion textureRegion, StarGame game) {
         super(textureRegion);
         this.game = game;
         setPressed(false);

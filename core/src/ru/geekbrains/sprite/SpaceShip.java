@@ -2,6 +2,7 @@ package ru.geekbrains.sprite;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 import ru.geekbrains.base.Sprite;
 import ru.geekbrains.group.SpriteFactory;
 import ru.geekbrains.utils.Rect;
+import ru.geekbrains.utils.Regions;
 
 
 public class SpaceShip extends Sprite {
@@ -19,9 +21,11 @@ public class SpaceShip extends Sprite {
     private static final float SIZE =  0.1f;
     private static final float RELOAD_INTERVAL = 0.25f;
     private static final float INERTIA = 0.25f;
+    private static final int HIP_POINT = 30;
 
     private static final float BULLET_SPEED = 0.5f;
     private static final float BULLET_SIZE = 0.05f;
+    private static final int BULLET_DAMAGE = 10;
 
     private Vector2 touchPosition;
     private Vector2 v;
@@ -36,9 +40,17 @@ public class SpaceShip extends Sprite {
     private Vector2 bulletV;
     private TextureRegion bulletRegion;
     private Sound bulletSound;
+    public int bulletDamage;
+
+    //Music
+    private Music music;
+
+    //Status
+    private boolean shootUp;
+    private boolean shieldUp;
 
     public SpaceShip(TextureAtlas atlas, SpriteFactory bullets) {
-        super(atlas.findRegion("spaceship"));
+        super(atlas.findRegion("spaceship"), 1, 2, 2);
         this.atlas = atlas;
 
         // init Spaceship
@@ -46,11 +58,22 @@ public class SpaceShip extends Sprite {
         this.v = new Vector2();
         this.reloadInterval = RELOAD_INTERVAL;
 
-        // init Bullets
+        // Music
+        music = Gdx.audio.newMusic(Gdx.files.internal("sounds/zx-hate.mp3"));
+        music.setVolume(0.1f);
+        music.setLooping(true);
+        music.play();
+
+        // Bullets
         this.bullets = bullets;
         this.bulletV = new Vector2(0, BULLET_SPEED);
         this.bulletRegion = atlas.findRegion("bullet2");
         this.bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
+        this.bulletDamage = BULLET_DAMAGE;
+
+        setHitPoint(HIP_POINT);
+        setShieldUp(false);
+        this.shootUp = false;
     }
 
     @Override
@@ -82,13 +105,7 @@ public class SpaceShip extends Sprite {
             setRight(worldBounds.getRight());
         }
 
-        // autoshooting
-        /*
-        passingTime +=delta;
-        if (passingTime >= reloadInterval) {
-            shoot();
-            passingTime = 0;
-        }*/
+        shoot(delta);
     }
 
     @Override
@@ -118,21 +135,60 @@ public class SpaceShip extends Sprite {
             case Input.Keys.SPACE:
             case Input.Keys.NUM_0:
             case Input.Keys.NUMPAD_0:
-                shoot();
+                shootUp = true;
+                break;
+            case Input.Keys.S:
+                setShieldUp(true);
+                break;
         }
         return super.keyDown(keycode);
     }
 
     @Override
     public boolean keyUp(int keycode) {
+        switch (keycode) {
+            case Input.Keys.SPACE:
+            case Input.Keys.NUM_0:
+            case Input.Keys.NUMPAD_0:
+                shootUp = false;
+                break;
+            case Input.Keys.S:
+                setShieldUp(false);
+                break;
+        }
         return super.keyUp(keycode);
     }
 
-    private void shoot() {
-        Bullet bullet = (Bullet) bullets.obtain();
-        bullet.setup(this, bulletRegion, pos, bulletV, BULLET_SIZE, worldBounds, 1);
-        bulletSound.play();
+    private void shoot(float delta) {
+        passingTime +=delta;
+        if (passingTime >= reloadInterval && shootUp && !shieldUp) {
+            Bullet bullet = (Bullet) bullets.obtain();
+            bullet.setup(this, bulletRegion, pos, bulletV, BULLET_SIZE, worldBounds, bulletDamage);
+            bulletSound.play();
+            passingTime = 0;
+        }
     }
+
+    public boolean isShieldUp() {
+        return shieldUp;
+    }
+
+    public void setShieldUp(boolean shieldUp) {
+        this.shieldUp = shieldUp;
+        if(shieldUp) {
+            frame = 1;
+        } else {
+            frame = 0;
+        }
+
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        music.stop();
+    }
+
 
     private void moveLeft() {
         touchPosition.set(pos.x - INERTIA, pos.y);
@@ -149,6 +205,7 @@ public class SpaceShip extends Sprite {
     @Override
     public void dispose() {
         bulletSound.dispose();
+        music.dispose();
         super.dispose();
     }
 }
