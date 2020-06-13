@@ -110,12 +110,31 @@ public class SpaceShip extends Sprite {
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
-        touchPosition.set(touch);
+        // w/o multitouch
+        if(touch.y < 0) {
+            touchPosition.set(touch);
+        } else {
+            if(touch.x < 0) {
+                shootUp = true;
+            } else {
+                setShieldUp(true);
+            }
+        }
         return super.touchDown(touch, pointer, button);
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer, int button) {
+        // w/o multitouch
+        if(touch.y < 0) {
+            touchPosition.set(touch);
+        } else {
+            if(touch.x < 0) {
+                shootUp = false;
+            } else {
+                setShieldUp(false);
+            }
+        }
         return super.touchUp(touch, pointer, button);
     }
 
