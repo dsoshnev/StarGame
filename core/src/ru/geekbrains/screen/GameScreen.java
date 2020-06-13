@@ -1,6 +1,7 @@
 package ru.geekbrains.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
@@ -53,6 +54,7 @@ public class GameScreen extends BaseScreen {
 
     //Explosion
     private Explosion explosion;
+    private Sound explosionSound;
 
     //Font
     ZXFont font;
@@ -91,7 +93,8 @@ public class GameScreen extends BaseScreen {
         enemyShips = new SpriteFactory(SpriteFactory.SpriteType.ENEMY_SHIP);
 
         // Explosion
-        explosion = new Explosion(atlas, Gdx.audio.newSound(Gdx.files.internal("sounds/explosion.wav")));
+        explosionSound = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion.wav"));
+        explosion = new Explosion(atlas, explosionSound);
 
 
         //Font
@@ -211,12 +214,12 @@ public class GameScreen extends BaseScreen {
                             spaceShip.damage(activeBullet.getDamage());
                         }
                         activeBullet.destroy();
-                        if(spaceShip.getHitPoint() == 0) {
-                            gameState = GameState.GAME_OVER;
-                            explosion.setup(0.1f, spaceShip.pos);
-                        }
                     }
                 }
+            }
+            if(spaceShip.getHitPoint() <= 0) {
+                gameState = GameState.GAME_OVER;
+                explosion.setup(0.1f, spaceShip.pos);
             }
         }
     }
@@ -256,6 +259,7 @@ public class GameScreen extends BaseScreen {
         spaceShip.dispose();
         enemyShips.dispose();
         explosion.dispose();
+        explosionSound.dispose();
         font.dispose();
         super.dispose();
     }

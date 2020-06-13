@@ -60,12 +60,12 @@ public class BaseScreen implements Screen, InputProcessor {
         MatrixUtils.calcTransitionMatrix(worldToGl, worldBounds, glBounds);
         MatrixUtils.calcTransitionMatrix(screenToWorld, screenBounds, worldBounds);
         batch.setProjectionMatrix(worldToGl);
-        System.out.printf("resize {h=%s, w=%s}%n", height, width);
+        //System.out.printf("resize {h=%s, w=%s}%n", height, width);
         resize(worldBounds);
     }
 
     public void resize(Rect worldBounds) {
-        System.out.printf("worldBounds {height=%s, with=%s}%n", worldBounds.getHeight(), worldBounds.getWidth());
+        //System.out.printf("worldBounds {height=%s, with=%s}%n", worldBounds.getHeight(), worldBounds.getWidth());
     }
 
     @Override
