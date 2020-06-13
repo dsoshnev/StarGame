@@ -1,6 +1,5 @@
 package ru.geekbrains.base;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
@@ -10,6 +9,7 @@ import com.badlogic.gdx.math.Matrix3;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 
+import ru.geekbrains.StarGame;
 import ru.geekbrains.utils.MatrixUtils;
 import ru.geekbrains.utils.Rect;
 
@@ -24,14 +24,10 @@ public class BaseScreen implements Screen, InputProcessor {
     protected Matrix4 worldToGl;
     protected Matrix3 screenToWorld;
 
-    protected Game game;
+    protected StarGame game;
 
-    public BaseScreen(Game game) {
+    public BaseScreen(StarGame game) {
         this.game = game;
-    }
-
-    public void setScreen(Screen screen) {
-        game.setScreen(screen);
     }
 
     @Override
@@ -47,7 +43,7 @@ public class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(1, 0, 0, 1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
 
@@ -94,13 +90,13 @@ public class BaseScreen implements Screen, InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        System.out.printf("keyDown=%s%n", keycode);
+        //System.out.printf("keyDown=%s%n", keycode);
         return false;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        System.out.printf("keyUp=%s%n", keycode);
+        //System.out.printf("keyUp=%s%n", keycode);
         return false;
     }
 

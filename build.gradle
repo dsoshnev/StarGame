@@ -10,7 +10,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.android.tools.build:gradle:4.0.0'
         classpath 'com.badlogicgames.gdx:gdx-tools:1.9.10'
     }
 }
@@ -20,7 +20,7 @@ allprojects {
 
     version = '1.0'
     ext {
-        appName = "StarGame"
+        appName = "SHIELDS UP"
         gdxVersion = '1.9.10'
         roboVMVersion = '2.3.8'
         box2DLightsVersion = '1.4'

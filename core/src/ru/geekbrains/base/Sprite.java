@@ -16,6 +16,9 @@ public class Sprite extends Rect implements Pool.Poolable {
     protected int frame = 0;
     private boolean active;
     protected Rect worldBounds;
+    private Sprite owner;
+    private int hitPoint;
+    private int damage;
 
     public Sprite() { }
 
@@ -39,14 +42,16 @@ public class Sprite extends Rect implements Pool.Poolable {
     public void update(float delta) {}
 
     public void draw(SpriteBatch batch) {
-        batch.draw(
-                regions[frame],
-                getLeft(), getBottom(),
-                halfWidth, halfHeight,
-                getWidth(), getHeight(),
-                scale, scale,
-                angle
-        );
+        if(isActive()) {
+            batch.draw(
+                    regions[frame],
+                    getLeft(), getBottom(),
+                    halfWidth, halfHeight,
+                    getWidth(), getHeight(),
+                    scale, scale,
+                    angle
+            );
+        }
     }
 
     public boolean isActive() {
@@ -97,8 +102,47 @@ public class Sprite extends Rect implements Pool.Poolable {
         setActive(false);
     }
 
+    public void damage(int damage) {
+        hitPoint -= damage;
+        if (hitPoint <= 0) {
+            hitPoint = 0;
+            destroy();
+        }
+    }
+
     @Override
     public void reset() {
         setActive(false);
+    }
+
+    public void dispose() {}
+
+    public boolean collided(Sprite sprite) {
+        float minDst = this.getHalfWidth() + sprite.getHalfWidth();
+        return this.pos.dst(sprite.pos) < minDst;
+    }
+
+    public Sprite getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Sprite owner) {
+        this.owner = owner;
+    }
+
+    public int getHitPoint() {
+        return hitPoint;
+    }
+
+    public void setHitPoint(int hitPoint) {
+        this.hitPoint = hitPoint;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+
+    public void setDamage(int damage) {
+        this.damage = damage;
     }
 }

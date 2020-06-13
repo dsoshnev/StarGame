@@ -1,8 +1,9 @@
-package ru.geekbrains.sprite;
+package ru.geekbrains.group;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
+import ru.geekbrains.sprite.Star;
 import ru.geekbrains.utils.Rect;
 
 public class Stars {

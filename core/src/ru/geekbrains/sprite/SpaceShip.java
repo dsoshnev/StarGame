@@ -1,67 +1,87 @@
 package ru.geekbrains.sprite;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Pool;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import ru.geekbrains.base.Sprite;
+import ru.geekbrains.group.SpriteFactory;
 import ru.geekbrains.utils.Rect;
+import ru.geekbrains.utils.Regions;
 
 
 public class SpaceShip extends Sprite {
 
     private static final float SPEED = 0.005f;
-    private static final float SIZE =  0.20f;
-    private static final float TIME_TO_SHOOT = 0.25f;
+    private static final float SIZE =  0.1f;
+    private static final float RELOAD_INTERVAL = 0.25f;
+    private static final float INERTIA = 0.25f;
+    private static final int HIP_POINT = 30;
+
+    private static final float BULLET_SPEED = 0.5f;
+    private static final float BULLET_SIZE = 0.05f;
+    private static final int BULLET_DAMAGE = 10;
+
     private Vector2 touchPosition;
     private Vector2 v;
 
-    private List<Bullet> bullets;
-    private Pool<Bullet> bulletPool;
-
-    private Sound bulletSound;
     private TextureAtlas atlas;
 
     private float passingTime;
+    private float reloadInterval;
 
-    public SpaceShip(TextureAtlas atlas) {
-        super(atlas.findRegion("main_ship"), 1, 2, 2);
+    //Bullets
+    private SpriteFactory bullets;
+    private Vector2 bulletV;
+    private TextureRegion bulletRegion;
+    private Sound bulletSound;
+    public int bulletDamage;
+
+    //Music
+    private Music music;
+
+    //Status
+    private boolean shootUp;
+    private boolean shieldUp;
+
+    public SpaceShip(TextureAtlas atlas, SpriteFactory bullets) {
+        super(atlas.findRegion("spaceship"), 1, 2, 2);
         this.atlas = atlas;
 
         // init Spaceship
         this.touchPosition = new Vector2();
         this.v = new Vector2();
+        this.reloadInterval = RELOAD_INTERVAL;
 
-        this.setBottom(-1f);
-        //this.touchPosition.set(pos);
+        // Music
+        music = Gdx.audio.newMusic(Gdx.files.internal("sounds/zx-hate.mp3"));
+        music.setVolume(0.1f);
+        music.setLooping(true);
+        music.play();
 
-        // init Bullets
-        this.bullets = new ArrayList<>();
-        this.bulletPool = new Pool<Bullet>(5) {
-            @Override
-            protected Bullet newObject() {
-                return new Bullet();
-            }
-        };
-
+        // Bullets
+        this.bullets = bullets;
+        this.bulletV = new Vector2(0, BULLET_SPEED);
+        this.bulletRegion = atlas.findRegion("bullet2");
         this.bulletSound = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
+        this.bulletDamage = BULLET_DAMAGE;
+
+        setHitPoint(HIP_POINT);
+        setShieldUp(false);
+        this.shootUp = false;
     }
 
     @Override
     public void resize(Rect worldBounds) {
         super.resize(worldBounds);
         setHeightProportion(SIZE);
-        for (Bullet bullet : bullets) {
-            bullet.resize(worldBounds);
-        }
+        setBottom(worldBounds.getBottom());
+        touchPosition.set(pos);
     }
 
     @Override
@@ -73,40 +93,19 @@ public class SpaceShip extends Sprite {
             v.setLength(SPEED);
         }
         pos.add(v);
+        //pos.mulAdd(v, delta);
 
-        // move to border by set length
-        /*if(!isMe(touchPosition)) {
-            //v.set(touchPosition).sub(pos).nor().scl(SPEED);
-            v.set(touchPosition).sub(pos).setLength(SPEED);
-            pos.add(v);
-        }*/
-
-        passingTime +=delta;
-        if (passingTime >= TIME_TO_SHOOT) {
-            shoot();
-            passingTime = 0;
+        if(getLeft() < worldBounds.getLeft()) {
+            stop();
+            setLeft(worldBounds.getLeft());
         }
 
-        Iterator itr = bullets.iterator();
-        while (itr.hasNext())
-        {
-            Bullet bullet = (Bullet) itr.next();
-            bullet.update(delta);
-            if(!bullet.isActive()) {
-                itr.remove();
-                bulletPool.free(bullet);
-                System.out.printf("Pool/Active:%s/%s%n", bulletPool.getFree(),bullets.size());
-            }
+        if(getRight() > worldBounds.getRight()) {
+            stop();
+            setRight(worldBounds.getRight());
         }
 
-    }
-
-    @Override
-    public void draw(SpriteBatch batch) {
-        super.draw(batch);
-        for (Bullet bullet : bullets) {
-            bullet.draw(batch);
-        }
+        shoot(delta);
     }
 
     @Override
@@ -122,26 +121,91 @@ public class SpaceShip extends Sprite {
 
     @Override
     public boolean keyDown(int keycode) {
+        switch (keycode) {
+            case Input.Keys.LEFT:
+            case Input.Keys.NUM_2:
+            case Input.Keys.NUMPAD_2:
+                moveLeft();
+                break;
+            case Input.Keys.RIGHT:
+            case Input.Keys.NUM_4:
+            case Input.Keys.NUMPAD_4:
+                moveRight();
+                break;
+            case Input.Keys.SPACE:
+            case Input.Keys.NUM_0:
+            case Input.Keys.NUMPAD_0:
+                shootUp = true;
+                break;
+            case Input.Keys.S:
+                setShieldUp(true);
+                break;
+        }
         return super.keyDown(keycode);
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        if (keycode == 62) {
-            shoot();
+        switch (keycode) {
+            case Input.Keys.SPACE:
+            case Input.Keys.NUM_0:
+            case Input.Keys.NUMPAD_0:
+                shootUp = false;
+                break;
+            case Input.Keys.S:
+                setShieldUp(false);
+                break;
         }
         return super.keyUp(keycode);
     }
 
-    private void shoot() {
-        TextureRegion bulletRegion = atlas.findRegion("bulletMainShip");
-        Vector2 bulletV = new Vector2(0, 0.5f);
-        Bullet bullet = bulletPool.obtain();
-        bullet.setup(this, bulletRegion, pos.cpy(), bulletV, 0.01f, worldBounds, 1);
-        bullets.add(bullet);
-        bulletSound.play();
-        System.out.printf("Pool/Active:%s/%s%n", bulletPool.getFree(),bullets.size());
+    private void shoot(float delta) {
+        passingTime +=delta;
+        if (passingTime >= reloadInterval && shootUp && !shieldUp) {
+            Bullet bullet = (Bullet) bullets.obtain();
+            bullet.setup(this, bulletRegion, pos, bulletV, BULLET_SIZE, worldBounds, bulletDamage);
+            bulletSound.play();
+            passingTime = 0;
+        }
+    }
+
+    public boolean isShieldUp() {
+        return shieldUp;
+    }
+
+    public void setShieldUp(boolean shieldUp) {
+        this.shieldUp = shieldUp;
+        if(shieldUp) {
+            frame = 1;
+        } else {
+            frame = 0;
+        }
+
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        music.stop();
     }
 
 
+    private void moveLeft() {
+        touchPosition.set(pos.x - INERTIA, pos.y);
+    }
+
+    private void moveRight() {
+        touchPosition.set(pos.x + INERTIA, pos.y);
+    }
+
+    private void stop() {
+        touchPosition.set(pos);
+    }
+
+    @Override
+    public void dispose() {
+        bulletSound.dispose();
+        music.dispose();
+        super.dispose();
+    }
 }
